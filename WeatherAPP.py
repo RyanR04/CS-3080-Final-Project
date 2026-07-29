@@ -25,10 +25,25 @@ class AppGUI():
         self.Intro_Label.pack(pady=10)
 
         self.textbox = tk.Text(self.root,height=1,font=("Arial,16"))
+        self.textbox.bind("<KeyPress>",self.get_input)
         self.textbox.pack(padx=10,pady=10)
 
         #This runs the GUI
         self.root.mainloop()
+
+    
+    def get_input(self,event):
+        #Checks if Enter has been enter
+        if event.keysym == "Return" and event.state == 0:
+            #Get City and Country incase there duplicates
+            City_Input,Country = self.textbox.get("1.0",tk.END).split(",")
+            print(f"The City of {City_Input} is in the Country to {Country}")
+            self.textbox.delete("1.0", tk.END)
+
+            
+                    
+
+
 
 
 #Main 
