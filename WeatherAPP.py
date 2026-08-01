@@ -8,11 +8,13 @@ import datetime as dt
 import requests
 
 BASE_URL = "https://api.openweathermap.org/data/2.5/weather?"
-API_Key = "d04a6beeb2871b7cddacc06477b407b3"
 
 
 # GUI Class for GUI functionality
 class AppGUI():
+
+    #Check if searched is already clicked
+    Already_Clicked = 0
 
     def __init__(self):
 
@@ -25,36 +27,42 @@ class AppGUI():
 
         #Labels,Textboxes,and Buttons Below
         
+        #Intro Label Use as Initial Prompt
         self.Intro_Label = tk.Label(self.root,text="Enter a city to get Weather",font=("Arial",18))
         self.Intro_Label.pack(pady=10)
 
-        self.textbox = tk.Text(self.root,height=1,font=("Arial,16"))
-        self.textbox.bind("<KeyPress>",self.display_input)
-        self.textbox.pack(padx=10,pady=10)
+        #TextBox used to Get City
+        self.textbox = tk.Text(self.root,height=1,font=("Arial",16))
+        self.textbox.pack(padx=5,pady=5)
+
+        self.Search_B = tk.Button(self.root,text="Search",font=("Arial",18),command=self.City_Info)
+        self.Search_B.pack()
 
         #This runs the GUI
         self.root.mainloop()
 
-    
-    def display_input(self,event):
 
-        hasUse = 0
+    def City_Info(self):
 
-        #Checks if Enter has been enter
-        if event.keysym == "Return" and event.state == 0:
 
-            #Get City and Country incase there duplicates
-            City_Input = self.textbox.get("1.0",tk.END)
-            # Then delete whats stored in textbox
-            self.textbox.delete("1.0", tk.END)
+        #Remove Intro_Label for now
+        self.Intro_Label.forget()
 
-            #Remove intro label
-            self.Intro_Label.forget()
-            #New label about current input
-            self.CityLabel = tk.Label(self.root,text=f"{City_Input}")
+        #Get City
+        City_Input = self.textbox.get("1.0",tk.END).strip()
+        # Then delete whats stored in textbox
+        self.textbox.delete("1.0", tk.END)
+
+        if self.Already_Clicked == 0:
+            self.CityLabel = tk.Label(self.root,text=f"{City_Input}",font=("Arial",20))
             self.CityLabel.pack()
+        else: 
+            self.CityLabel.config(text=f"{City_Input}")
 
-   
+        self.Already_Clicked += 1
+
+
+
 #Main 
 def main():
 
