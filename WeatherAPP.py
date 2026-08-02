@@ -51,8 +51,8 @@ class AppGUI():
        
         
         # Create the buttons
-        self.SaveB = tk.Button(self.ButtonGrid, text="Save")
-        self.HomeB = tk.Button(self.ButtonGrid, text="Home")
+        self.SaveB = tk.Button(self.ButtonGrid, text="Save",command=self.Save_City)
+        self.HomeB = tk.Button(self.ButtonGrid, text="Home",command=self.HomePage)
         self.ConvertB = tk.Button(self.ButtonGrid, text="Convert to Fahrenheight",command=self.Convert)
 
         # Position them in one row
@@ -83,7 +83,9 @@ class AppGUI():
         for i in range(5):
             self.ForeCastGrid.columnconfigure(i,weight=1)
         #Forgetting it currently
-        self.ForeCastGrid.forget
+        self.ForeCastGrid.forget()
+
+        self.SavedCity = []
 
 
         #This runs the GUI
@@ -101,6 +103,13 @@ class AppGUI():
         #Get City
         self.City_Input = self.textbox.get("1.0",tk.END).strip()
         self.textbox.delete("1.0", tk.END)
+
+        if self.City_Input in self.SavedCity:
+            self.SaveB.config(text="Remove",command=self.Remove_City)
+        else:
+            self.SaveB.config(text="Save",command=self.Save_City)
+
+
 
         with ThreadPoolExecutor() as executor:
             Dweather = executor.submit(Get_Weather_Data,self.City_Input,self.City_Units)
@@ -173,15 +182,24 @@ class AppGUI():
         else: 
             #Else config it to new City Value
             self.CityLabel.config(text=f"{UCity_Input},{UCity_Country}")
+            self.CityLabel.pack()
             self.IconLabel.config(image=photo)
             self.IconLabel.image = photo
+            self.IconLabel.pack()
             self.DesL.config(text=f"{UDaily_Des}")
+            self.DesL.pack()
             self.TempL.config(text=f"{UDaily_T}{SymbolT}")
+            self.TempL.pack()
             self.TempMML.config(text=f"Max: {UDaily_Max}{SymbolT}   Min: {UDaily_Min}{SymbolT}")
+            self.TempMML.pack()
             self.FeelL.config(text=f"Feels Like: {UDaily_FeelT}{SymbolT}")
+            self.FeelL.pack()
             self.HumL.config(text=f"Humidity: {UDaily_H} %")
+            self.HumL.pack()
             self.WinL.config(text=f"Wind Speed: {UDaily_W} {SymbolM}")
+            self.WinL.pack()
             self.SunRS.config(text=f"Sunrise: {UCity_Sunrise}  Sunset: {UCity_Sunset}")
+            self.SunRS.pack()
 
         #Increment the Already Clicked Class Var
         self.Already_Clicked += 1
@@ -245,17 +263,57 @@ class AppGUI():
 
             column += 1
 
+    def Save_City(self):
 
+        if self.City_Input not in self.SavedCity:
+            self.SavedCity.append(self.City_Input)
+
+        if self.City_Input in self.SavedCity:
+            self.SaveB.config(text="Remove",command=self.Remove_City) 
+
+        print(self.SavedCity)
+
+    def Remove_City(self):
+
+        if self.City_Input in self.SavedCity:
+            self.SavedCity.remove(self.City_Input)
+            self.SaveB.config(text="Save",command=self.Save_City)
+
+        print(self.SavedCity)
+
+    def HomePage(self):
+
+        # Clear the forcast grid fist anf then forget
+        for widget in self.ForeCastGrid.winfo_children():
+            widget.destroy()
+        self.ForeCastGrid.forget()
+
+        self.ButtonGrid.forget()
+        self.CityLabel.forget()
+        self.IconLabel.forget()
+        self.DesL.forget()
+        self.TempL.forget()
+        self.TempMML.forget()
+        self.FeelL.forget()
+        self.HumL.forget()
+        self.WinL.forget()
+        self.SunRS.forget()
+
+        self.Intro_Label.pack(before=self.textbox)
+
+
+
+
+ 
 
         
 
 
 
 
+    
 
-
-
-
+        
 #Function to get all needed Weather Data for Display
 def Get_Weather_Data(City,CUnit):
 
@@ -291,6 +349,7 @@ def Get_Weather_Data(City,CUnit):
 
     #Return Needed Information
     return City_Temp,City_Feels_Temp,City_Max,City_Min,City_Humidity,City_Description,City_Wind,Country,City_Icon,City_Sunrise,City_Sunset
+
 
 
 def Get_ForeCast(CityF,FUnit):
