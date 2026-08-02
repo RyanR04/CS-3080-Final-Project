@@ -32,7 +32,7 @@ class AppGUI():
     def __init__(self):
 
         #Intializing GUI and adding demensions
-        self.BG = "#D3E5F6"
+        self.BG = "#2E94F4"
         self.root = tk.Tk()
         self.root.geometry("500x700")
         self.root.config(bg=self.BG)
@@ -86,6 +86,8 @@ class AppGUI():
         self.ForeCastGrid.forget()
 
         self.SavedCity = []
+
+        self.CityB = []
 
 
         #This runs the GUI
@@ -301,19 +303,11 @@ class AppGUI():
 
         self.Intro_Label.pack(before=self.textbox)
 
+            
 
 
 
- 
-
-        
-
-
-
-
-    
-
-        
+      
 #Function to get all needed Weather Data for Display
 def Get_Weather_Data(City,CUnit):
 
@@ -368,8 +362,8 @@ def Get_ForeCast(CityF,FUnit):
         #If not in five_days intilize the data
         if date not in five_day:
             five_day[date]={
-                'high': forecast['main']['temp_max'],
-                'low': forecast['main']['temp_min'],
+                'high': round(forecast['main']['temp_max']),
+                'low': round(forecast['main']['temp_min']),
                 'icon': forecast['weather'][0]['icon']
             }
         #Else comp current value with the current max and forecasr and update
