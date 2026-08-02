@@ -1,5 +1,5 @@
 # Ryan Rupakheti
-# Final Porject
+# Final Project
 # 7/19/2026
 
 #Import Needed Libraires and Class
@@ -16,8 +16,6 @@ from concurrent.futures import ThreadPoolExecutor
 BASE_URL1 = "https://api.openweathermap.org/data/2.5/weather?"
 BASE_URL2 = "https://api.openweathermap.org/data/2.5/forecast?"
 API_KEY = "de845e805a9b50f6b70f941e46d62ad6"
-
-
 
 
 # GUI Class for GUI functionality
@@ -87,14 +85,14 @@ class AppGUI():
 
         self.SavedCity = []
 
-        self.CityB = []
+        self.CityButton = []
 
 
         #This runs the GUI
         self.root.mainloop()
 
     #Get City Info
-    def Display_Info(self):
+    def Display_Info(self,City=None):
 
         #Remove Intro_Label for now
         self.Intro_Label.forget()
@@ -102,16 +100,20 @@ class AppGUI():
         #Put Button Frame on Top
         self.ButtonGrid.pack(before=self.textbox)
 
-        #Get City
-        self.City_Input = self.textbox.get("1.0",tk.END).strip()
-        self.textbox.delete("1.0", tk.END)
+        for widgets in self.CityButton:
+            widgets.forget()
+
+        if City == None:
+            #Get City
+            self.City_Input = self.textbox.get("1.0",tk.END).strip()
+            self.textbox.delete("1.0", tk.END)
+        else:
+            self.City_Input = City
 
         if self.City_Input in self.SavedCity:
             self.SaveB.config(text="Remove",command=self.Remove_City)
         else:
             self.SaveB.config(text="Save",command=self.Save_City)
-
-
 
         with ThreadPoolExecutor() as executor:
             Dweather = executor.submit(Get_Weather_Data,self.City_Input,self.City_Units)
@@ -301,13 +303,24 @@ class AppGUI():
         self.WinL.forget()
         self.SunRS.forget()
 
+        #Dstroy old widgets so we dont repeat new ones
+        for widgets in self.CityButton:
+            widgets.destroy()
+
+        self.CityButton.clear()
+
         self.Intro_Label.pack(before=self.textbox)
 
-            
+        #Create widgets based on list
+        for i in self.SavedCity:
+            CButton = tk.Button(self.root,text=i,command= lambda city = i: self.Display_Info(city))
+            CButton.pack()
+            self.CityButton.append(CButton)
 
+        
 
-
-      
+        
+ 
 #Function to get all needed Weather Data for Display
 def Get_Weather_Data(City,CUnit):
 
