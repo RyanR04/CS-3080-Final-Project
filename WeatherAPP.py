@@ -12,7 +12,9 @@ from io import BytesIO
 
 
 BASE_URL1 = "https://api.openweathermap.org/data/2.5/weather?"
-API_KEY = "d04a6beeb2871b7cddacc06477b407b3"
+BASE_URL2 = "https://api.openweathermap.org/data/2.5/forecast?"
+API_KEY = "de845e805a9b50f6b70f941e46d62ad6"
+
 
 
 
@@ -30,7 +32,7 @@ class AppGUI():
         #Intializing GUI and adding demensions
         self.BG = "#D3E5F6"
         self.root = tk.Tk()
-        self.root.geometry("500x500")
+        self.root.geometry("500x700")
         self.root.config(bg=self.BG)
 
         #Title
@@ -59,6 +61,7 @@ class AppGUI():
         #Do not display intially
         self.ButtonGrid.forget()
 
+
         #Intro Label Use as Initial Prompt
         self.Intro_Label = tk.Label(self.root,text="Enter a city to get Weather",font=("Arial",18),bg=self.BG)
         self.Intro_Label.pack(pady=10)
@@ -70,6 +73,16 @@ class AppGUI():
         #Serach button that displays information
         self.Search_B = tk.Button(self.root,text="Search",font=("Arial",18),command=self.Display_Info,bg=self.BG)
         self.Search_B.pack()
+
+
+        #Making grid
+        self.ForeCastGrid = tk.Frame(self.root,bg="white")
+        #Makit it a 5 x 5
+        for i in range(5):
+            self.ForeCastGrid.columnconfigure(i,weight=1)
+        #Forgetting it currently
+        self.ForeCastGrid.forget
+
 
         #This runs the GUI
         self.root.mainloop()
@@ -93,6 +106,13 @@ class AppGUI():
         #Send them to update labels which will check and chnage them
         self.Update_Labels(Daily_T,Daily_FeelT,Daily_Max,Daily_Min,Daily_H,Daily_Des,Daily_W,City_Country,self.City_Input,DCity_Icon,DCity_Sunrise,DCity_Sunset)
 
+        #Call Forcast with city and the units
+        Five_Day = Get_ForeCast(self.City_Input, self.City_Units)
+        #Display the 5 day forecast
+        self.DisplayForeCast(Five_Day,self.City_Units)
+
+        self.ForeCastGrid.pack(pady=10, fill="x")
+
 
     def Update_Labels(self,UDaily_T,UDaily_FeelT,UDaily_Max,UDaily_Min,UDaily_H,UDaily_Des,UDaily_W,UCity_Country,UCity_Input,UCity_Icon,UCity_Sunrise,UCity_Sunset):
 
@@ -115,7 +135,7 @@ class AppGUI():
         #If Already Clicked was 0
         if self.Already_Clicked == 0:
             #Create a CityLabel with text
-            self.CityLabel = tk.Label(self.root,text=f"{UCity_Input},{UCity_Country}",bg=self.BG,font=("Arial",20))
+            self.CityLabel = tk.Label(self.root,text=f"{UCity_Input},{UCity_Country}",bg=self.BG,font=("Arial",20),fg="black")
             #Pack the label on screen
             self.CityLabel.pack()
 
@@ -123,25 +143,25 @@ class AppGUI():
             self.IconLabel.image = photo
             self.IconLabel.pack()
         
-            self.DesL = tk.Label(self.root,bg=self.BG,text=f"{UDaily_Des}")
+            self.DesL = tk.Label(self.root,bg=self.BG,text=f"{UDaily_Des}",fg="black")
             self.DesL.pack()
         
-            self.TempL = tk.Label(self.root,bg=self.BG,text=f"{UDaily_T}{SymbolT}")
+            self.TempL = tk.Label(self.root,bg=self.BG,text=f"{UDaily_T}{SymbolT}",fg="black")
             self.TempL.pack()
                     
-            self.TempMML = tk.Label(self.root,bg=self.BG,text=f"Max: {UDaily_Max}{SymbolT}  Min: {UDaily_Min}{SymbolT}")
+            self.TempMML = tk.Label(self.root,bg=self.BG,text=f"Max: {UDaily_Max}{SymbolT}  Min: {UDaily_Min}{SymbolT}",fg="black")
             self.TempMML.pack()
                     
-            self.FeelL = tk.Label(self.root,bg=self.BG,text=f"Feels Like: {UDaily_FeelT}{SymbolT}")
+            self.FeelL = tk.Label(self.root,bg=self.BG,text=f"Feels Like: {UDaily_FeelT}{SymbolT}",fg="black")
             self.FeelL.pack()
                     
-            self.HumL = tk.Label(self.root,bg=self.BG,text=f"Humidity: {UDaily_H}%")
+            self.HumL = tk.Label(self.root,bg=self.BG,text=f"Humidity: {UDaily_H}%",fg="black")
             self.HumL.pack()
                     
-            self.WinL = tk.Label(self.root,bg=self.BG,text=f"Wind Speed: {UDaily_W} {SymbolM}")
+            self.WinL = tk.Label(self.root,bg=self.BG,text=f"Wind Speed: {UDaily_W} {SymbolM}",fg="black")
             self.WinL.pack()
 
-            self.SunRS = tk.Label(self.root,bg=self.BG,text=f"Sunrise: {UCity_Sunrise}  Sunset: {UCity_Sunset}")
+            self.SunRS = tk.Label(self.root,bg=self.BG,text=f"Sunrise: {UCity_Sunrise}  Sunset: {UCity_Sunset}",fg="black")
             self.SunRS.pack()
         else: 
             #Else config it to new City Value
@@ -168,13 +188,61 @@ class AppGUI():
 
         #Send them to update labels which will check and chnage them
         self.Update_Labels(CDaily_T,CDaily_FeelT,CDaily_Max,CDaily_Min,CDaily_H,CDaily_Des,CDaily_W,CCity_Country,self.City_Input,CCity_Icon,CCity_Sunrise,CCity_Sunset)
-        
+
+        CFive_Day = Get_ForeCast(self.City_Input,self.City_Units)
+
+        self.DisplayForeCast(CFive_Day,self.City_Units)
+
 
     def Convert_Units(self,Units_G):
         if Units_G == "imperial":
             return "metric"
         else:
            return "imperial"
+
+
+    def DisplayForeCast(self,Five_Day,FUnits):
+
+        if FUnits == "imperial":
+            Symbol = "°F"
+        else:
+            Symbol = "°C"
+
+        column = 0
+
+        for key, val in Five_Day.items():
+
+            Icon_URL = f"https://openweathermap.org/img/wn/{val['icon']}@2x.png"
+
+            response = requests.get(Icon_URL)
+
+            image = Image.open(BytesIO(response.content))
+            photo = ImageTk.PhotoImage(image)
+
+            DayLabel = tk.Label(self.ForeCastGrid, text=val['day'],bg="white",fg="black")
+
+            IconLabel = tk.Label(self.ForeCastGrid,image=photo,bg="white")
+            IconLabel.image = photo
+
+            HighLabel = tk.Label(self.ForeCastGrid, text=f"{val['high']}{Symbol}",bg="white",fg="black")
+            LowLabel = tk.Label(self.ForeCastGrid, text=f"{val['low']}{Symbol}",bg="white",fg="black")
+
+            DayLabel.grid(row=0, column=column)
+            IconLabel.grid(row=1, column=column)
+            HighLabel.grid(row=2, column=column)
+            LowLabel.grid(row=3, column=column)
+
+            column += 1
+
+
+
+        
+
+
+
+
+
+
 
 
 #Function to get all needed Weather Data for Display
@@ -213,11 +281,47 @@ def Get_Weather_Data(City,CUnit):
     #Return Needed Information
     return City_Temp,City_Feels_Temp,City_Max,City_Min,City_Humidity,City_Description,City_Wind,Country,City_Icon,City_Sunrise,City_Sunset
 
+
+def Get_ForeCast(CityF,FUnit):
+
+    url2 = BASE_URL2 + "appid=" + API_KEY + "&q=" + CityF + "&units=" + FUnit
+
+    Five_Day_F = requests.get(url2).json()
+
+    #Stores only needed data
+    five_day = {}
+    
+    # For each forecast in Five_Day_F
+    for forecast in Five_Day_F['list']:
+        # Get the date
+        date = forecast['dt_txt'].split()[0]
+        #If not in five_days intilize the data
+        if date not in five_day:
+            five_day[date]={
+                'high': forecast['main']['temp_max'],
+                'low': forecast['main']['temp_min'],
+                'icon': forecast['weather'][0]['icon']
+            }
+        #Else comp current value with the current max and forecasr and update
+        else:
+            five_day[date]['high'] = round(max(five_day[date]['high'], forecast['main']['temp_max']))
+            five_day[date]['low'] = round(min(five_day[date]['low'], forecast['main']['temp_min']))
+    
+        
+    for key,value in five_day.items():
+        Cdate = dt.strptime(key,"%Y-%m-%d")
+        weekday = Cdate.weekday()
+        five_day[key]["day"] = cd.day_abbr[weekday]
+
+    return five_day
+
+
+
+    
 #Main 
 def main():
 
-    #Open Gui
     AppGUI()
-
+ 
 if __name__ == "__main__":
     main()
