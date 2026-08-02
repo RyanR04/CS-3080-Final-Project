@@ -9,6 +9,8 @@ import requests
 import calendar as cd
 from PIL import Image, ImageTk
 from io import BytesIO
+from concurrent.futures import ThreadPoolExecutor
+
 
 
 BASE_URL1 = "https://api.openweathermap.org/data/2.5/weather?"
@@ -100,14 +102,19 @@ class AppGUI():
         self.City_Input = self.textbox.get("1.0",tk.END).strip()
         self.textbox.delete("1.0", tk.END)
 
+        with ThreadPoolExecutor() as executor:
+            Dweather = executor.submit(Get_Weather_Data,self.City_Input,self.City_Units)
+            Fweather = executor.submit(Get_ForeCast,self.City_Input,self.City_Units)
+
+
         #Get all Data For Labels
-        Daily_T,Daily_FeelT,Daily_Max,Daily_Min,Daily_H,Daily_Des,Daily_W,City_Country,DCity_Icon,DCity_Sunrise,DCity_Sunset = Get_Weather_Data(self.City_Input,self.City_Units)
+        Daily_T,Daily_FeelT,Daily_Max,Daily_Min,Daily_H,Daily_Des,Daily_W,City_Country,DCity_Icon,DCity_Sunrise,DCity_Sunset = Dweather.result()
 
         #Send them to update labels which will check and chnage them
         self.Update_Labels(Daily_T,Daily_FeelT,Daily_Max,Daily_Min,Daily_H,Daily_Des,Daily_W,City_Country,self.City_Input,DCity_Icon,DCity_Sunrise,DCity_Sunset)
 
         #Call Forcast with city and the units
-        Five_Day = Get_ForeCast(self.City_Input, self.City_Units)
+        Five_Day = Fweather.result()
         #Display the 5 day forecast
         self.DisplayForeCast(Five_Day,self.City_Units)
 
@@ -183,13 +190,17 @@ class AppGUI():
 
         self.City_Units = self.Convert_Units(self.City_Units)
 
+        with ThreadPoolExecutor() as executor:
+            CDweather = executor.submit(Get_Weather_Data,self.City_Input,self.City_Units)
+            CFweather = executor.submit(Get_ForeCast,self.City_Input,self.City_Units)
+
         #Get all Data For Labels
-        CDaily_T,CDaily_FeelT,CDaily_Max,CDaily_Min,CDaily_H,CDaily_Des,CDaily_W,CCity_Country,CCity_Icon,CCity_Sunrise,CCity_Sunset = Get_Weather_Data(self.City_Input,self.City_Units)
+        CDaily_T,CDaily_FeelT,CDaily_Max,CDaily_Min,CDaily_H,CDaily_Des,CDaily_W,CCity_Country,CCity_Icon,CCity_Sunrise,CCity_Sunset = CDweather.result()
 
         #Send them to update labels which will check and chnage them
         self.Update_Labels(CDaily_T,CDaily_FeelT,CDaily_Max,CDaily_Min,CDaily_H,CDaily_Des,CDaily_W,CCity_Country,self.City_Input,CCity_Icon,CCity_Sunrise,CCity_Sunset)
 
-        CFive_Day = Get_ForeCast(self.City_Input,self.City_Units)
+        CFive_Day = CFweather.result()
 
         self.DisplayForeCast(CFive_Day,self.City_Units)
 
@@ -315,9 +326,7 @@ def Get_ForeCast(CityF,FUnit):
 
     return five_day
 
-
-
-    
+  
 #Main 
 def main():
 
