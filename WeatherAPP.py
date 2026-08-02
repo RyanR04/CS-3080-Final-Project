@@ -84,8 +84,14 @@ class AppGUI():
         self.ForeCastGrid.forget()
 
         self.SavedCity = []
-
+        with open("CityButtons.txt","r") as f:
+              self.SavedCity = f.readline()
+              self.SavedCity = self.SavedCity.split(",")
+           
+            
         self.CityButton = []
+
+        self.SavedButtons()
 
 
         #This runs the GUI
@@ -275,7 +281,11 @@ class AppGUI():
         if self.City_Input in self.SavedCity:
             self.SaveB.config(text="Remove",command=self.Remove_City) 
 
-        print(self.SavedCity)
+    
+        with open("CityButtons.txt","w") as f:
+                f.write(",".join(self.SavedCity))
+           
+
 
     def Remove_City(self):
 
@@ -283,7 +293,9 @@ class AppGUI():
             self.SavedCity.remove(self.City_Input)
             self.SaveB.config(text="Save",command=self.Save_City)
 
-        print(self.SavedCity)
+        with open("CityButtons.txt","w") as f:
+                f.write(",".join(self.SavedCity))
+        
 
     def HomePage(self):
 
@@ -311,16 +323,18 @@ class AppGUI():
 
         self.Intro_Label.pack(before=self.textbox)
 
+        self.SavedButtons()
+
+
+    def SavedButtons(self):
         #Create widgets based on list
         for i in self.SavedCity:
-            CButton = tk.Button(self.root,text=i,command= lambda city = i: self.Display_Info(city))
-            CButton.pack()
-            self.CityButton.append(CButton)
+            if i != "":
+                CButton = tk.Button(self.root,text=i,command= lambda city = i: self.Display_Info(city))
+                CButton.pack()
+                self.CityButton.append(CButton)
 
-        
-
-        
- 
+     
 #Function to get all needed Weather Data for Display
 def Get_Weather_Data(City,CUnit):
 
@@ -391,8 +405,7 @@ def Get_ForeCast(CityF,FUnit):
         five_day[key]["day"] = cd.day_abbr[weekday]
 
     return five_day
-
-  
+ 
 #Main 
 def main():
 
