@@ -66,7 +66,7 @@ class AppGUI():
 
 
         #Intro Label Use as Initial Prompt
-        self.Intro_Label = tk.Label(self.root,text="Enter a city to get Weather",font=("Arial",18),bg=self.BG)
+        self.Intro_Label = tk.Label(self.root,text="Type a city to get weather and click search",font=("Arial",18),bg=self.BG)
         self.Intro_Label.pack(pady=10)
 
         #TextBox used to Get City
