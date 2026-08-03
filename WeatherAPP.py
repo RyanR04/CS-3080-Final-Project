@@ -4,6 +4,7 @@
 
 #Import Needed Libraires and Class
 import tkinter as tk
+from tkinter import messagebox
 from datetime import datetime as dt 
 import requests
 import calendar as cd
@@ -11,11 +12,13 @@ from PIL import Image, ImageTk
 from io import BytesIO
 from concurrent.futures import ThreadPoolExecutor
 
-
-
 BASE_URL1 = "https://api.openweathermap.org/data/2.5/weather?"
 BASE_URL2 = "https://api.openweathermap.org/data/2.5/forecast?"
-API_KEY = "de845e805a9b50f6b70f941e46d62ad6"
+
+with open("API_Info","r") as file:
+    API_KEY = file.readline().strip()
+    print(API_KEY)
+    
 
 
 # GUI Class for GUI functionality
@@ -84,9 +87,12 @@ class AppGUI():
         self.ForeCastGrid.forget()
 
         self.SavedCity = []
-        with open("CityButtons.txt","r") as f:
+        try:
+            with open("CityButtons.txt","r") as f:
               self.SavedCity = f.readline()
               self.SavedCity = self.SavedCity.split(",")
+        except FileNotFoundError:
+            messagebox.showerror("No File",'File not found')
            
             
         self.CityButton = []
@@ -100,15 +106,6 @@ class AppGUI():
     #Get City Info
     def Display_Info(self,City=None):
 
-        #Remove Intro_Label for now
-        self.Intro_Label.forget()
-
-        #Put Button Frame on Top
-        self.ButtonGrid.pack(before=self.textbox)
-
-        for widgets in self.CityButton:
-            widgets.forget()
-
         if City == None:
             #Get City
             self.City_Input = self.textbox.get("1.0",tk.END).strip()
@@ -116,26 +113,46 @@ class AppGUI():
         else:
             self.City_Input = City
 
-        if self.City_Input in self.SavedCity:
-            self.SaveB.config(text="Remove",command=self.Remove_City)
-        else:
-            self.SaveB.config(text="Save",command=self.Save_City)
-
         with ThreadPoolExecutor() as executor:
             Dweather = executor.submit(Get_Weather_Data,self.City_Input,self.City_Units)
             Fweather = executor.submit(Get_ForeCast,self.City_Input,self.City_Units)
 
+        try:
+            #Get all Data For Labels
+            Daily_T,Daily_FeelT,Daily_Max,Daily_Min,Daily_H,Daily_Des,Daily_W,City_Country,DCity_Icon,DCity_Sunrise,DCity_Sunset = Dweather.result()
+        except KeyError:
+            messagebox.showerror("No City","Please enter a valid city")
+            return
+            
 
-        #Get all Data For Labels
-        Daily_T,Daily_FeelT,Daily_Max,Daily_Min,Daily_H,Daily_Des,Daily_W,City_Country,DCity_Icon,DCity_Sunrise,DCity_Sunset = Dweather.result()
+        # Remove Intro_Label for now
+        self.Intro_Label.forget()
 
+        #Put Button Frame on Top
+        self.ButtonGrid.pack(before=self.textbox)
+
+        for widgets in self.CityButton:
+            widgets.forget()
+            
         #Send them to update labels which will check and chnage them
         self.Update_Labels(Daily_T,Daily_FeelT,Daily_Max,Daily_Min,Daily_H,Daily_Des,Daily_W,City_Country,self.City_Input,DCity_Icon,DCity_Sunrise,DCity_Sunset)
 
-        #Call Forcast with city and the units
-        Five_Day = Fweather.result()
+        try:
+            #Call Forcast with city and the units
+            Five_Day = Fweather.result()
+        except KeyError:
+            messagebox.showerror("No City","Please enter a valid city")
+            return
+            
+
         #Display the 5 day forecast
         self.DisplayForeCast(Five_Day,self.City_Units)
+
+        if self.City_Input in self.SavedCity:
+            self.SaveB.config(text="Remove",command=self.Remove_City)
+        else:
+            self.SaveB.config(text="Save",command=self.Save_City)
+        
 
         self.ForeCastGrid.pack(pady=10, fill="x")
 
@@ -172,22 +189,22 @@ class AppGUI():
             self.DesL = tk.Label(self.root,bg=self.BG,text=f"{UDaily_Des}",fg="black")
             self.DesL.pack()
         
-            self.TempL = tk.Label(self.root,bg=self.BG,text=f"{UDaily_T}{SymbolT}",fg="black")
+            self.TempL = tk.Label(self.root,bg=self.BG,text=f"{UDaily_T}{SymbolT}",fg="black",font=("Arial",20))
             self.TempL.pack()
                     
-            self.TempMML = tk.Label(self.root,bg=self.BG,text=f"Max: {UDaily_Max}{SymbolT}  Min: {UDaily_Min}{SymbolT}",fg="black")
+            self.TempMML = tk.Label(self.root,bg=self.BG,text=f"Max: {UDaily_Max}{SymbolT}  Min: {UDaily_Min}{SymbolT}",fg="black",font=("Arial",15))
             self.TempMML.pack()
                     
-            self.FeelL = tk.Label(self.root,bg=self.BG,text=f"Feels Like: {UDaily_FeelT}{SymbolT}",fg="black")
+            self.FeelL = tk.Label(self.root,bg=self.BG,text=f"Feels Like: {UDaily_FeelT}{SymbolT}",fg="black",font=("Arial",15))
             self.FeelL.pack()
                     
-            self.HumL = tk.Label(self.root,bg=self.BG,text=f"Humidity: {UDaily_H}%",fg="black")
+            self.HumL = tk.Label(self.root,bg=self.BG,text=f"Humidity: {UDaily_H}%",fg="black",font=("Arial",15))
             self.HumL.pack()
                     
-            self.WinL = tk.Label(self.root,bg=self.BG,text=f"Wind Speed: {UDaily_W} {SymbolM}",fg="black")
+            self.WinL = tk.Label(self.root,bg=self.BG,text=f"Wind Speed: {UDaily_W} {SymbolM}",fg="black",font=("Arial",15))
             self.WinL.pack()
 
-            self.SunRS = tk.Label(self.root,bg=self.BG,text=f"Sunrise: {UCity_Sunrise}  Sunset: {UCity_Sunset}",fg="black")
+            self.SunRS = tk.Label(self.root,bg=self.BG,text=f"Sunrise: {UCity_Sunrise}  Sunset: {UCity_Sunset}",fg="black",font=("Arial",15))
             self.SunRS.pack()
         else: 
             #Else config it to new City Value
@@ -281,20 +298,26 @@ class AppGUI():
         if self.City_Input in self.SavedCity:
             self.SaveB.config(text="Remove",command=self.Remove_City) 
 
-    
-        with open("CityButtons.txt","w") as f:
-                f.write(",".join(self.SavedCity))
-           
+        self.UpdateFile()
 
 
+        
     def Remove_City(self):
 
         if self.City_Input in self.SavedCity:
             self.SavedCity.remove(self.City_Input)
             self.SaveB.config(text="Save",command=self.Save_City)
 
-        with open("CityButtons.txt","w") as f:
+        self.UpdateFile()
+
+
+    def UpdateFile(self):
+        try:
+            with open("CityButtons.txt","w") as f:
                 f.write(",".join(self.SavedCity))
+        except FileNotFoundError:
+            messagebox.showerror("No File","File not Found")
+            return
         
 
     def HomePage(self):
@@ -339,12 +362,13 @@ class AppGUI():
 def Get_Weather_Data(City,CUnit):
 
     url1 = BASE_URL1 + "appid=" + API_KEY + "&q=" + City + "&units=" + CUnit
+
   
     #Get the current info from city url
     Current_City = requests.get(url1).json()
-
+  
     #Get country it is in
-    Country = Current_City['sys']['country']
+    Country = Current_City['sys']['country'] 
 
     #Here we get Basic Daily ForCast Information 
     City_Temp = round(Current_City['main']['temp'])
