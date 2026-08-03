@@ -15,6 +15,7 @@ from concurrent.futures import ThreadPoolExecutor
 BASE_URL1 = "https://api.openweathermap.org/data/2.5/weather?"
 BASE_URL2 = "https://api.openweathermap.org/data/2.5/forecast?"
 
+#File to open API key and read the key
 with open("API_Info","r") as file:
     API_KEY = file.readline().strip()
     print(API_KEY)
