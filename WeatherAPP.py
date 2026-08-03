@@ -121,10 +121,10 @@ class AppGUI():
             #Get all Data For Labels
             Daily_T,Daily_FeelT,Daily_Max,Daily_Min,Daily_H,Daily_Des,Daily_W,City_Country,DCity_Icon,DCity_Sunrise,DCity_Sunset = Dweather.result()
         except KeyError:
+            self.HomePage()
             messagebox.showerror("No City","Please enter a valid city")
             return
             
-
         # Remove Intro_Label for now
         self.Intro_Label.forget()
 
@@ -178,7 +178,7 @@ class AppGUI():
         #If Already Clicked was 0
         if self.Already_Clicked == 0:
             #Create a CityLabel with text
-            self.CityLabel = tk.Label(self.root,text=f"{UCity_Input},{UCity_Country}",bg=self.BG,font=("Arial",20),fg="black")
+            self.CityLabel = tk.Label(self.root,text=f"{UCity_Input},{UCity_Country}",bg=self.BG,font=("Arial",30),fg="black")
             #Pack the label on screen
             self.CityLabel.pack()
 
@@ -189,22 +189,22 @@ class AppGUI():
             self.DesL = tk.Label(self.root,bg=self.BG,text=f"{UDaily_Des}",fg="black")
             self.DesL.pack()
         
-            self.TempL = tk.Label(self.root,bg=self.BG,text=f"{UDaily_T}{SymbolT}",fg="black",font=("Arial",20))
+            self.TempL = tk.Label(self.root,bg=self.BG,text=f"{UDaily_T}{SymbolT}",fg="black",font=("Arial",25))
             self.TempL.pack()
                     
-            self.TempMML = tk.Label(self.root,bg=self.BG,text=f"Max: {UDaily_Max}{SymbolT}  Min: {UDaily_Min}{SymbolT}",fg="black",font=("Arial",15))
+            self.TempMML = tk.Label(self.root,bg=self.BG,text=f"Max: {UDaily_Max}{SymbolT}  Min: {UDaily_Min}{SymbolT}",fg="black",font=("Arial",20))
             self.TempMML.pack()
                     
-            self.FeelL = tk.Label(self.root,bg=self.BG,text=f"Feels Like: {UDaily_FeelT}{SymbolT}",fg="black",font=("Arial",15))
+            self.FeelL = tk.Label(self.root,bg=self.BG,text=f"Feels Like: {UDaily_FeelT}{SymbolT}",fg="black",font=("Arial",20))
             self.FeelL.pack()
                     
-            self.HumL = tk.Label(self.root,bg=self.BG,text=f"Humidity: {UDaily_H}%",fg="black",font=("Arial",15))
+            self.HumL = tk.Label(self.root,bg=self.BG,text=f"Humidity: {UDaily_H}%",fg="black",font=("Arial",20))
             self.HumL.pack()
                     
-            self.WinL = tk.Label(self.root,bg=self.BG,text=f"Wind Speed: {UDaily_W} {SymbolM}",fg="black",font=("Arial",15))
+            self.WinL = tk.Label(self.root,bg=self.BG,text=f"Wind Speed: {UDaily_W} {SymbolM}",fg="black",font=("Arial",20))
             self.WinL.pack()
 
-            self.SunRS = tk.Label(self.root,bg=self.BG,text=f"Sunrise: {UCity_Sunrise}  Sunset: {UCity_Sunset}",fg="black",font=("Arial",15))
+            self.SunRS = tk.Label(self.root,bg=self.BG,text=f"Sunrise: {UCity_Sunrise}  Sunset: {UCity_Sunset}",fg="black",font=("Arial",20))
             self.SunRS.pack()
         else: 
             #Else config it to new City Value
