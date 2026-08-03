@@ -21,7 +21,6 @@ with open("API_Info","r") as file:
     print(API_KEY)
     
 
-
 # GUI Class for GUI functionality
 class AppGUI():
 
@@ -87,7 +86,9 @@ class AppGUI():
         #Forgetting it currently
         self.ForeCastGrid.forget()
 
+        #SavedCity list to store cities
         self.SavedCity = []
+        #Check if file exist if empty nothing store and made if not display
         try:
             with open("CityButtons.txt","r") as f:
               self.SavedCity = f.readline()
@@ -95,11 +96,11 @@ class AppGUI():
         except FileNotFoundError:
             messagebox.showerror("No File",'File not found')
            
-            
+        # List for all city button objects
         self.CityButton = []
 
+        #Display prev stored cities
         self.SavedButtons()
-
 
         #This runs the GUI
         self.root.mainloop()
@@ -107,6 +108,7 @@ class AppGUI():
     #Get City Info
     def Display_Info(self,City=None):
 
+        #Check if new city or saved city is given
         if City == None:
             #Get City
             self.City_Input = self.textbox.get("1.0",tk.END).strip()
@@ -114,10 +116,12 @@ class AppGUI():
         else:
             self.City_Input = City
 
+        #Create two threads to get data
         with ThreadPoolExecutor() as executor:
             Dweather = executor.submit(Get_Weather_Data,self.City_Input,self.City_Units)
             Fweather = executor.submit(Get_ForeCast,self.City_Input,self.City_Units)
 
+        #If cannot get data go to home
         try:
             #Get all Data For Labels
             Daily_T,Daily_FeelT,Daily_Max,Daily_Min,Daily_H,Daily_Des,Daily_W,City_Country,DCity_Icon,DCity_Sunrise,DCity_Sunset = Dweather.result()
@@ -132,12 +136,14 @@ class AppGUI():
         #Put Button Frame on Top
         self.ButtonGrid.pack(before=self.textbox)
 
+        #Forget city widgets when on page
         for widgets in self.CityButton:
             widgets.forget()
             
         #Send them to update labels which will check and chnage them
         self.Update_Labels(Daily_T,Daily_FeelT,Daily_Max,Daily_Min,Daily_H,Daily_Des,Daily_W,City_Country,self.City_Input,DCity_Icon,DCity_Sunrise,DCity_Sunset)
 
+        #Check if i can get forecast if not go to home
         try:
             #Call Forcast with city and the units
             Five_Day = Fweather.result()
@@ -149,26 +155,30 @@ class AppGUI():
         #Display the 5 day forecast
         self.DisplayForeCast(Five_Day,self.City_Units)
 
+        #If city not saved change button
         if self.City_Input in self.SavedCity:
             self.SaveB.config(text="Remove",command=self.Remove_City)
         else:
             self.SaveB.config(text="Save",command=self.Save_City)
         
-
+        #Display forecast grid
         self.ForeCastGrid.pack(pady=10, fill="x")
 
-
+    #Used to update and get new output
     def Update_Labels(self,UDaily_T,UDaily_FeelT,UDaily_Max,UDaily_Min,UDaily_H,UDaily_Des,UDaily_W,UCity_Country,UCity_Input,UCity_Icon,UCity_Sunrise,UCity_Sunset):
 
+        #If metric use metric symbols
         if self.City_Units == "metric":
             self.ConvertB.config(text="Convert to Fahrenheight")
             SymbolT = "°C"
             SymbolM = "M/S"
+        #Else imperial
         elif self.City_Units == "imperial":
             self.ConvertB.config(text="Convert to Celsius")
             SymbolT = "°F"
             SymbolM = "MPH"
 
+        #Get the icon and put it in format for label later
         Icon_URL = f"https://openweathermap.org/img/wn/{UCity_Icon}@2x.png"
 
         response = requests.get(Icon_URL)
@@ -178,9 +188,10 @@ class AppGUI():
         
         #If Already Clicked was 0
         if self.Already_Clicked == 0:
-            #Create a CityLabel with text
+
+            #Create all labels for display
+
             self.CityLabel = tk.Label(self.root,text=f"{UCity_Input},{UCity_Country}",bg=self.BG,font=("Arial",30),fg="black")
-            #Pack the label on screen
             self.CityLabel.pack()
 
             self.IconLabel = tk.Label(self.root,bg=self.BG,image=photo)
@@ -232,43 +243,53 @@ class AppGUI():
         #Increment the Already Clicked Class Var
         self.Already_Clicked += 1
 
+    # Convert function that changes the units for display
     def Convert(self):
 
+        #First get new units
         self.City_Units = self.Convert_Units(self.City_Units)
 
+        #Make two threads for forecast and display in threapool
         with ThreadPoolExecutor() as executor:
             CDweather = executor.submit(Get_Weather_Data,self.City_Input,self.City_Units)
             CFweather = executor.submit(Get_ForeCast,self.City_Input,self.City_Units)
 
+        
         #Get all Data For Labels
         CDaily_T,CDaily_FeelT,CDaily_Max,CDaily_Min,CDaily_H,CDaily_Des,CDaily_W,CCity_Country,CCity_Icon,CCity_Sunrise,CCity_Sunset = CDweather.result()
 
         #Send them to update labels which will check and chnage them
         self.Update_Labels(CDaily_T,CDaily_FeelT,CDaily_Max,CDaily_Min,CDaily_H,CDaily_Des,CDaily_W,CCity_Country,self.City_Input,CCity_Icon,CCity_Sunrise,CCity_Sunset)
 
+        #get all data for forecast
         CFive_Day = CFweather.result()
 
+        #Display it for forecast
         self.DisplayForeCast(CFive_Day,self.City_Units)
 
-
+    #Used by Convert to find conversion metric
     def Convert_Units(self,Units_G):
         if Units_G == "imperial":
             return "metric"
         else:
            return "imperial"
 
-
+    #This displays the 5-day forecast by passing its dict and units
     def DisplayForeCast(self,Five_Day,FUnits):
 
+        #If imperial put F else C
         if FUnits == "imperial":
             Symbol = "°F"
         else:
             Symbol = "°C"
 
+        #Column counter to fill out grid
         column = 0
 
+        # Loop through dictionary (I know key is not needed but could be for future chnage)
         for key, val in Five_Day.items():
 
+            #Get the icon and put it in proper format
             Icon_URL = f"https://openweathermap.org/img/wn/{val['icon']}@2x.png"
 
             response = requests.get(Icon_URL)
@@ -276,21 +297,27 @@ class AppGUI():
             image = Image.open(BytesIO(response.content))
             photo = ImageTk.PhotoImage(image)
 
+            #Make label and add days on it
             DayLabel = tk.Label(self.ForeCastGrid, text=val['day'],bg="white",fg="black")
 
+            #Then label for icon and add all icons
             IconLabel = tk.Label(self.ForeCastGrid,image=photo,bg="white")
             IconLabel.image = photo
 
+            #Labels that has all High and Low temps
             HighLabel = tk.Label(self.ForeCastGrid, text=f"{val['high']}{Symbol}",bg="white",fg="black")
             LowLabel = tk.Label(self.ForeCastGrid, text=f"{val['low']}{Symbol}",bg="white",fg="black")
 
+            #From each specifc row on grid fill out the column
             DayLabel.grid(row=0, column=column)
             IconLabel.grid(row=1, column=column)
             HighLabel.grid(row=2, column=column)
             LowLabel.grid(row=3, column=column)
 
+            #Increment to stop overwrite
             column += 1
 
+    #Adds city to list and txt file
     def Save_City(self):
 
         if self.City_Input not in self.SavedCity:
@@ -302,7 +329,7 @@ class AppGUI():
         self.UpdateFile()
 
 
-        
+    #Removes city from list and txt file 
     def Remove_City(self):
 
         if self.City_Input in self.SavedCity:
@@ -311,7 +338,7 @@ class AppGUI():
 
         self.UpdateFile()
 
-
+    #Used by save and remove to write to file has excpetion handling in case it is gone
     def UpdateFile(self):
         try:
             with open("CityButtons.txt","w") as f:
@@ -320,7 +347,7 @@ class AppGUI():
             messagebox.showerror("No File","File not Found")
             return
         
-
+    #Home page function for display
     def HomePage(self):
 
         # Clear the forcast grid fist anf then forget
@@ -328,6 +355,7 @@ class AppGUI():
             widget.destroy()
         self.ForeCastGrid.forget()
 
+        #Forget weather info label
         self.ButtonGrid.forget()
         self.CityLabel.forget()
         self.IconLabel.forget()
@@ -342,14 +370,16 @@ class AppGUI():
         #Dstroy old widgets so we dont repeat new ones
         for widgets in self.CityButton:
             widgets.destroy()
-
+        #Clear the button from the cities saved list
         self.CityButton.clear()
 
+        #Bring back intro label
         self.Intro_Label.pack(before=self.textbox)
 
+        #Make new citysaved buttons
         self.SavedButtons()
 
-
+    #This cretes the current widgets fro the saved ciites on home page
     def SavedButtons(self):
         #Create widgets based on list
         for i in self.SavedCity:
@@ -399,9 +429,10 @@ def Get_Weather_Data(City,CUnit):
 
 
 def Get_ForeCast(CityF,FUnit):
-
+    #Create API url for data
     url2 = BASE_URL2 + "appid=" + API_KEY + "&q=" + CityF + "&units=" + FUnit
 
+    #Pull and put on JSON file
     Five_Day_F = requests.get(url2).json()
 
     #Stores only needed data
@@ -423,15 +454,16 @@ def Get_ForeCast(CityF,FUnit):
             five_day[date]['high'] = round(max(five_day[date]['high'], forecast['main']['temp_max']))
             five_day[date]['low'] = round(min(five_day[date]['low'], forecast['main']['temp_min']))
     
-        
+    #This creates the day key by converting date string to day value  
     for key,value in five_day.items():
         Cdate = dt.strptime(key,"%Y-%m-%d")
         weekday = Cdate.weekday()
         five_day[key]["day"] = cd.day_abbr[weekday]
 
+    #Return the needed dictionary 
     return five_day
 
-#Main 
+#Main  fucntion to run GUI
 def main():
 
     AppGUI()
