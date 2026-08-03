@@ -354,7 +354,7 @@ class AppGUI():
         for i in self.SavedCity:
             if i != "":
                 CButton = tk.Button(self.root,text=i,command= lambda city = i: self.Display_Info(city))
-                CButton.pack()
+                CButton.pack(fill="x", padx=10, pady=2)
                 self.CityButton.append(CButton)
 
      
@@ -429,7 +429,7 @@ def Get_ForeCast(CityF,FUnit):
         five_day[key]["day"] = cd.day_abbr[weekday]
 
     return five_day
- 
+
 #Main 
 def main():
 

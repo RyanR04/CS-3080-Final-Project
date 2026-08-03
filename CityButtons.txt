@@ -1,1 +1,1 @@
-,Dallas,Liverpool,Denver
+Denver,Dallas,,Liverpool
