@@ -33,3 +33,6 @@ This weather app is a python desktop application built with tkinter and using da
 2. View current weather and convert by using convert button.
 3. Save cities using save and remove when wanted
 4. On homepage click saved cities for quick access
+
+### Disclosure of AI
+I have used AI to help with understanding bugs and to help learn how to convert icon codes in a format that the tkitner can use.
