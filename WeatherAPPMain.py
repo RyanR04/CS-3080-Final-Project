@@ -12,14 +12,13 @@ from PIL import Image, ImageTk
 from io import BytesIO
 from concurrent.futures import ThreadPoolExecutor
 
-BASE_URL1 = "https://api.openweathermap.org/data/2.5/weather?"
-BASE_URL2 = "https://api.openweathermap.org/data/2.5/forecast?"
 
 #File to open API key and read the key
 with open("API_Info","r") as file:
     API_KEY = file.readline().strip()
-    print(API_KEY)
-    
+
+BASE_URL1 = "https://api.openweathermap.org/data/2.5/weather?"
+BASE_URL2 = "https://api.openweathermap.org/data/2.5/forecast?" 
 
 # GUI Class for GUI functionality
 class AppGUI():
@@ -35,7 +34,7 @@ class AppGUI():
         #Intializing GUI and adding demensions
         self.BG = "#2E94F4"
         self.root = tk.Tk()
-        self.root.geometry("500x700")
+        self.root.geometry("800x800")
         self.root.config(bg=self.BG)
 
         #Title
@@ -64,7 +63,6 @@ class AppGUI():
         #Do not display intially
         self.ButtonGrid.forget()
 
-
         #Intro Label Use as Initial Prompt
         self.Intro_Label = tk.Label(self.root,text="Type a city to get weather and click search",font=("Arial",18),bg=self.BG)
         self.Intro_Label.pack(pady=10)
@@ -76,7 +74,6 @@ class AppGUI():
         #Serach button that displays information
         self.Search_B = tk.Button(self.root,text="Search",font=("Arial",18),command=self.Display_Info,bg=self.BG)
         self.Search_B.pack()
-
 
         #Making grid
         self.ForeCastGrid = tk.Frame(self.root,bg="white")
